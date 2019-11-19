@@ -17,6 +17,9 @@ cleos create account eosio playerc EOS6v86d8DAxjfGu92CLrnEzq7pySpVWYV2LjaxPaDJJv
 cleos create account eosio playerd EOS6v86d8DAxjfGu92CLrnEzq7pySpVWYV2LjaxPaDJJvyf9Vpx5R
 cleos create account eosio playere EOS6v86d8DAxjfGu92CLrnEzq7pySpVWYV2LjaxPaDJJvyf9Vpx5R
 
+cleos set account permission eosio.token active --add-code
+cleos set account permission rps active --add-code
+
 cleos set code eosio.token eosio.token.wasm
 cleos set abi eosio.token eosio.token.abi
 
