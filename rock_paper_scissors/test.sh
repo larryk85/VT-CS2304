@@ -5,7 +5,7 @@ function check_state() {
     diff -I "game_deadline.*" .test.output ./expected/$1.$2.expected &> /dev/null
     status=$?
     if [[ $status != 0 ]]; then
-        echo "Failure, funds table does not match $1.$2.expected"
+        echo "Failure, table does not match $1.$2.expected"
         diff -I "game_deadline.*" .test.output ./expected/$1.$2.expected
         exit -1
     fi
