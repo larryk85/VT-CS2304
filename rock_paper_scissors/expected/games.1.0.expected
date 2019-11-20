@@ -1,11 +1,0 @@
-executed transaction: 6e5c422d8a4b13a295449db61baba76adb20e8fdb2a6ca6a3f78370bbf871972  112 bytes  502 us
-warn  2019-11-20T20:58:40.463 cleos     main.cpp:495                  print_result         ] warning: transaction executed locally, but may not be confirmed by the network yet
-#         eosio <= eosio::checkstate            {"tablename":"games","pk":["uint64",1]}
->> table games : pk(1) -> 
->> game_id : 1
->> players : 
->> clear_winners : 
->> last_eval_player : 
->> game_deadline : 1574283521
->> wager_pool : 30.0000 VT
->> is_active : true

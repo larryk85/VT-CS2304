@@ -1,39 +1,5 @@
-{
-  "rows": [{
-      "game_id": 1,
-      "players": [{
-          "key": "player1",
-          "value": {
-            "player": "player1",
-            "choice": "0000000000000000000000000000000000000000000000000000000000000000",
-            "active": 1
-          }
-        },{
-          "key": "player2",
-          "value": {
-            "player": "player2",
-            "choice": "0000000000000000000000000000000000000000000000000000000000000000",
-            "active": 1
-          }
-        },{
-          "key": "player3",
-          "value": {
-            "player": "player3",
-            "choice": "0000000000000000000000000000000000000000000000000000000000000000",
-            "active": 1
-          }
-        }
-      ],
-      "clear_winners": [
-        "player1",
-        "player2",
-        "player3"
-      ],
-      "last_eval_player": "",
-      "game_deadline": "2019-11-20T06:08:26.000",
-      "wager_pool": "0 ",
-      "is_active": 1
-    }
-  ],
-  "more": false
-}
+[31mError 3015013: Unpack data exception[0m
+[33mError Details:
+Unable to unpack array of built-in type 'name' while processing 'name[]'[0m
+Stack Trace:
+abi_serializer.cpp:327 _binary_to_variant

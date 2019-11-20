@@ -1,4 +1,0 @@
-executed transaction: fcb929661d3aeea9e9732315cc65860757f7693e6f31f82733dd11b76f5723c1  112 bytes  289 us
-warn  2019-11-20T20:50:01.897 cleos     main.cpp:495                  print_result         ] warning: transaction executed locally, but may not be confirmed by the network yet
-#         eosio <= eosio::checkstate            {"tablename":"funds","pk":["name","player4"]}
->> table funds : pk(player4) -> 100.0000 VT

@@ -20,16 +20,16 @@ else
 fi
 
 function check_state() {
-    command="cleos --verbose push action $ACCOUNT checkstate '[\"$1\", [\"$4\", \"$2\"]]' -p eosio"
+    command="cleos --verbose get table $ACCOUNT $ACCOUNT $1"
     eval $command &> .test.output
-    diff -I "game_deadline.*" -I "warn.*" -I "executed.*" .test.output ./expected/$1.$2.$3.expected &> /dev/null
+    diff -I "game_deadline.*" -I "warn.*" -I "executed.*" .test.output ./expected/$1.$2.expected &> /dev/null
     status=$?
     if [[ $status != 0 ]]; then
-        echo -e "\e[31mFailure, table does not match $1.$2.$3.expected\e[0m"
-        diff -I "game_deadline.*" .test.output ./expected/$1.$2.$3.expected
+        echo -e "\e[31mFailure, table does not match $1.$2.expected\e[0m"
+        diff -I "game_deadline.*" .test.output ./expected/$1.$2.expected
         exit -1
     fi
-    echo -e "\e[32mcheck state $1 $2 $3 passed\e[0m"
+    echo -e "\e[32mcheck state $1 $2 passed\e[0m"
 }
 
 function try_deposit() {
@@ -50,7 +50,6 @@ function try_deposit() {
 function try_join() {
     choice_cmd="echo -n $3$4 | sha256sum | cut -d \" \" -f1"
     choice=`eval $choice_cmd`
-    echo $choice
     command="cleos --verbose push action $ACCOUNT join '[\"$1\", \"$2\", \"$choice\"]' -p $1"
     eval $command #$output_stream
     status=$?
@@ -60,6 +59,18 @@ function try_join() {
     fi
     echo -e "\e[32mJoining a game $1 $2 passed\e[0m"
 }
+
+function try_bootstrap() {
+    command="cleos --verbose push action $ACCOUNT bootstrap '[]' -p $ACCOUNT"
+    eval $command $output_stream
+    status=$?
+    if [[ $status != 0 ]]; then
+        echo -e "\e[31mFailed to bootstrap\e[0m"
+        exit -1
+    fi
+    echo -e "\e[32mBootstrapping passed\e[0m"
+}
+
 pushd ../
 ./stop.sh $output_stream
 ./reset.sh $output_stream
@@ -70,23 +81,21 @@ popd
 
 ./build.sh
 
+try_bootstrap
+
 try_deposit player1 "100.0000 VT"
 try_deposit player2 "100.0000 VT"
 try_deposit player3 "100.0000 VT"
 try_deposit player4 "100.0000 VT"
 try_deposit player5 "100.0000 VT"
 
-check_state funds player1 0 name
-check_state funds player2 0 name
-check_state funds player3 0 name
-check_state funds player4 0 name
-check_state funds player5 0 name
+check_state funds 0
 
 try_join player1 "10.0000 VT" "rock" 42
 try_join player2 "10.0000 VT" "scissors" 33
 try_join player3 "10.0000 VT" "paper" 13
 
-check_state games 1 0 uint64
+check_state games 0
 
 sleep 3
 
@@ -94,4 +103,4 @@ try_join player4 "33.0000 VT" "paper" 3
 try_join player1 "20.0000 VT" "rock" 32
 try_join player5 "23.0000 VT" "paper" 22
 
-check_state games 2 0 uint64
+check_state games 1
