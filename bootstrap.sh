@@ -19,12 +19,23 @@ cleos create account eosio playere EOS6v86d8DAxjfGu92CLrnEzq7pySpVWYV2LjaxPaDJJv
 
 cleos set account permission eosio.token active --add-code
 cleos set account permission rps active --add-code
+cleos set account permission player1 active --add-code
+cleos set account permission player2 active --add-code
+cleos set account permission player3 active --add-code
+cleos set account permission player4 active --add-code
+cleos set account permission player5 active --add-code
+cleos set account permission playera active --add-code
+cleos set account permission playerb active --add-code
+cleos set account permission playerc active --add-code
+cleos set account permission playerd active --add-code
+cleos set account permission playere active --add-code
 
 cleos set code eosio.token eosio.token.wasm
 cleos set abi eosio.token eosio.token.abi
 
-cleos push action eosio.token create '["eosio", "100000.0000 VT"]' -p eosio.token
+cleos push action eosio.token create '["eosio", "1000000.0000 VT"]' -p eosio.token
 
+cleos push action eosio.token issue '["rps", "10000.0000 VT", "issuing tokens"]' -p eosio
 cleos push action eosio.token issue '["player1", "10000.0000 VT", "issuing tokens"]' -p eosio
 cleos push action eosio.token issue '["player2", "10000.0000 VT", "issuing tokens"]' -p eosio
 cleos push action eosio.token issue '["player3", "10000.0000 VT", "issuing tokens"]' -p eosio

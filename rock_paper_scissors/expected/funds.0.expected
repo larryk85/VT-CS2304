@@ -8,6 +8,12 @@
     },{
       "player": "player3",
       "deposit": "100.0000 VT"
+    },{
+      "player": "player4",
+      "deposit": "100.0000 VT"
+    },{
+      "player": "player5",
+      "deposit": "100.0000 VT"
     }
   ],
   "more": false
