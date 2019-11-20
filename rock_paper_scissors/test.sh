@@ -1,15 +1,7 @@
 #! /bin/bash
 
-function check_state() {
-    cleos get table $ACCOUNT $ACCOUNT $1 &> .test.output
-    diff -I "game_deadline.*" .test.output ./expected/$1.$2.expected &> /dev/null
-    status=$?
-    if [[ $status != 0 ]]; then
-        echo "Failure, table does not match $1.$2.expected"
-        diff -I "game_deadline.*" .test.output ./expected/$1.$2.expected
-        exit -1
-    fi
-}
+# set this to true if you want verbose output
+VERBOSE=false
 
 if [[ $1 == "non-root" ]]; then
     ACCOUNT="rps"
@@ -21,42 +13,85 @@ fi
 
 export ACCOUNT=$ACCOUNT
 
+if [[ "$VERBOSE" = true ]]; then
+    output_stream="2>&1"
+else
+    output_stream="&> /dev/null"
+fi
+
+function check_state() {
+    command="cleos --verbose push action $ACCOUNT checkstate '[\"$1\", [\"$4\", \"$2\"]]' -p eosio"
+    eval $command &> .test.output
+    diff -I "game_deadline.*" -I "warn.*" -I "executed.*" .test.output ./expected/$1.$2.$3.expected &> /dev/null
+    status=$?
+    if [[ $status != 0 ]]; then
+        echo -e "\e[31mFailure, table does not match $1.$2.$3.expected\e[0m"
+        diff -I "game_deadline.*" .test.output ./expected/$1.$2.$3.expected
+        exit -1
+    fi
+    echo -e "\e[32mcheck state $1 $2 $3 passed\e[0m"
+}
+
+function try_deposit() {
+    if [ "$is_eosio" = true ]; then
+        command="cleos --verbose push action $ACCOUNT deposit '[\"$1\", \"$2\"]' -p $1"
+    else
+        command="cleos --verbose push action eosio.token transfer '[\"$1\", \"rps\", \"$2\", \"depositing funds\"]' -p $1"
+    fi
+    eval $command $output_stream
+    status=$?
+    if [[ $status != 0 ]]; then
+        echo -e "\e[31mFailed deposit $1\e[0m"
+        exit -1
+    fi
+    echo -e "\e[32mDeposit $1 $2 passed\e[0m"
+}
+
+function try_join() {
+    choice_cmd="echo -n $3$4 | sha256sum | cut -d \" \" -f1"
+    choice=`eval $choice_cmd`
+    echo $choice
+    command="cleos --verbose push action $ACCOUNT join '[\"$1\", \"$2\", \"$choice\"]' -p $1"
+    eval $command #$output_stream
+    status=$?
+    if [[ $status != 0 ]]; then
+        echo -e "\e[31mFailed to join $1\e[0m"
+        exit -1
+    fi
+    echo -e "\e[32mJoining a game $1 $2 passed\e[0m"
+}
 pushd ../
-./stop.sh
-./reset.sh
+./stop.sh $output_stream
+./reset.sh $output_stream
 ./start.sh &> /dev/null &
 sleep 2
-./bootstrap.sh
+./bootstrap.sh &> /dev/null
 popd
 
 ./build.sh
 
-if [ "$is_eosio" = true ]; then
-    cleos push action $ACCOUNT deposit '["player1", "100.0000 VT"]' -p player1
-    cleos push action $ACCOUNT deposit '["player2", "100.0000 VT"]' -p player2
-    cleos push action $ACCOUNT deposit '["player3", "100.0000 VT"]' -p player3
-    cleos push action $ACCOUNT deposit '["player4", "100.0000 VT"]' -p player4
-    cleos push action $ACCOUNT deposit '["player5", "100.0000 VT"]' -p player5
-else
-    cleos push action eosio.token transfer '["player1", "rps", "100.0000 VT", "depositing"]' -p player1
-    cleos push action eosio.token transfer '["player2", "rps", "100.0000 VT", "depositing"]' -p player2
-    cleos push action eosio.token transfer '["player3", "rps", "100.0000 VT", "depositing"]' -p player3
-    cleos push action eosio.token transfer '["player4", "rps", "100.0000 VT", "depositing"]' -p player4
-    cleos push action eosio.token transfer '["player5", "rps", "100.0000 VT", "depositing"]' -p player5
-fi
+try_deposit player1 "100.0000 VT"
+try_deposit player2 "100.0000 VT"
+try_deposit player3 "100.0000 VT"
+try_deposit player4 "100.0000 VT"
+try_deposit player5 "100.0000 VT"
 
-check_state funds 0
+check_state funds player1 0 name
+check_state funds player2 0 name
+check_state funds player3 0 name
+check_state funds player4 0 name
+check_state funds player5 0 name
 
-cleos push action $ACCOUNT join '["player1", "10.0000 VT"]' -p player1
-cleos push action $ACCOUNT join '["player2", "10.0000 VT"]' -p player2
-cleos push action $ACCOUNT join '["player3", "10.0000 VT"]' -p player3
+try_join player1 "10.0000 VT" "rock" 42
+try_join player2 "10.0000 VT" "scissors" 33
+try_join player3 "10.0000 VT" "paper" 13
 
-check_state games 0
+check_state games 1 0 uint64
 
 sleep 3
 
-cleos push action $ACCOUNT join '["player4", "33.0000 VT"]' -p player4
-cleos push action $ACCOUNT join '["player1", "20.0000 VT"]' -p player1
-cleos push action $ACCOUNT join '["player5", "23.0000 VT"]' -p player5
+try_join player4 "33.0000 VT" "paper" 3
+try_join player1 "20.0000 VT" "rock" 32
+try_join player5 "23.0000 VT" "paper" 22
 
-check_state games 1
+check_state games 2 0 uint64
