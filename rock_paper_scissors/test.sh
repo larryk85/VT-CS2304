@@ -60,6 +60,28 @@ function try_join() {
     echo -e "\e[32mJoining a game $1 $2 passed\e[0m"
 }
 
+function try_reveal() {
+    command="cleos --verbose push action $ACCOUNT reveal '[\"$1\", \"$2\", \"$3\", \"$4\"]' -p $2"
+    eval $command #$output_stream
+    status=$?
+    if [[ $status != 0 ]]; then
+        echo -e "\e[31mFailed to reveal $1\e[0m"
+        exit -1
+    fi
+    echo -e "\e[32mRevealing $1 $2 passed\e[0m"
+}
+
+function try_rungame() {
+    command="cleos --verbose push action $ACCOUNT rungame '[]' -p $ACCOUNT"
+    eval $command #$output_stream
+    status=$?
+    if [[ $status != 0 ]]; then
+        echo -e "\e[31mFailed to rungame\e[0m"
+        exit -1
+    fi
+    echo -e "\e[32mRungame passed\e[0m"
+}
+
 function try_bootstrap() {
     command="cleos --verbose push action $ACCOUNT bootstrap '[]' -p $ACCOUNT"
     eval $command $output_stream
@@ -104,3 +126,13 @@ try_join player1 "20.0000 VT" "rock" 32
 try_join player5 "23.0000 VT" "paper" 22
 
 check_state games 1
+
+sleep 3
+
+try_reveal 1 player1 "rock" 42
+try_reveal 1 player3 "paper" 13
+try_reveal 1 player2 "scissors" 33
+
+try_rungame
+sleep 1
+try_rungame

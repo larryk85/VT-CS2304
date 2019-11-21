@@ -14,15 +14,9 @@
 
 using namespace eosio;
 
-// Given the semantics of upper_bound(...), if the upper bound
-// does not exist then it will return the last element.
-// This is a variable that you can use to grab the last element
-// in your table.
-static inline uint64_t game_upper_bound = std::numeric_limits<uint64_t>::max();
-
 static inline auto default_auths = std::vector<eosio::permission_level>{};
-time_point to_seconds_minutes(const uint32_t t) {
-    return static_cast<time_point>(time_point_sec(t));
+time_point plus_five_minutes(const time_point& p) {
+    return static_cast<time_point>(time_point_sec(1)) + p;
 }
 
 bool is_asset_negative(const asset& a) { return a.amount < 0; }
@@ -68,14 +62,14 @@ CONTRACT rock_paper_scissors : public contract {
 
         TABLE gameplayer {
             name player;
-            std::set<uint64_t> games;
+            std::vector<uint64_t> games;
             // fields used for metrics later
-            uint32_t wins;
-            uint32_t losses;
+            uint64_t wins;
+            uint64_t losses;
             asset highest_wager;
             uint64_t primary_key()const { return player.value; }
-            uint32_t by_wins()const { return wins; }
-            uint32_t by_losses()const { return losses; }
+            uint64_t by_wins()const { return wins; }
+            uint64_t by_losses()const { return losses; }
             uint64_t by_wager()const { return highest_wager.amount; }
         };
 
@@ -110,21 +104,32 @@ CONTRACT rock_paper_scissors : public contract {
         using games = multi_index<"games"_n, game>;
         using funds = multi_index<"funds"_n, fund>;
         using game_players = multi_index<"gameplayers"_n, gameplayer,
-            indexed_by<"bywins"_n, const_mem_fun<gameplayer, uint32_t, &gameplayer::by_wins>>,
-            indexed_by<"bylosses"_n, const_mem_fun<gameplayer, uint32_t, &gameplayer::by_losses>>,
+            indexed_by<"bywins"_n, const_mem_fun<gameplayer, uint64_t, &gameplayer::by_wins>>,
+            indexed_by<"bylosses"_n, const_mem_fun<gameplayer, uint64_t, &gameplayer::by_losses>>,
             indexed_by<"bywager"_n, const_mem_fun<gameplayer, uint64_t, &gameplayer::by_wager>>>;
         using game_state = singleton<"gamestate"_n, gamestate>;
 
     private:
- 
+  
         // function to "deposit" funds to this account
         // this should do the internal record keeping with
         // the `_funds` table
         void handle_deposit(const name& player, const asset& dep);
 
-        void run_round(game& g);
+        template <typename Iter>
+        Iter choose_loser(game& g, Iter first, Iter second) {
+            std::string first_choice = g.players[*first].actual_choice;
+            std::string second_choice = g.players[*second].actual_choice;
+            
+            // handling the case where the player is inactive
+            if (!g.players[*first].active)
+                return first;
+            else if (!g.players[*second].active)
+                return second;
 
-        void run_rounds(uint32_t rounds);
+            // you need to determine the loser of this round,
+            // regular rock, paper, scissors rules apply
+        }
 
         void schedule_for_processing(uint64_t id) {
             auto _s = _state.get_or_default();
@@ -146,17 +151,15 @@ CONTRACT rock_paper_scissors : public contract {
         uint64_t get_last_game_id() {
             return _state.get_or_default().last_game_id;
         }
-
-        bool has_player_committed_choice( const player_state& p ) {
-            static const auto default_choice = checksum256{};
-            return p.choice == default_choice;
-        }
-        
-        bool have_all_players_committed( uint64_t game_id ) {
+       
+        // helper method to determine if all of the players
+        // have revealed their answers
+        bool have_all_players_revealed( uint64_t game_id ) {
             const auto& iter = _games.find(game_id);
-            for (const auto& [k, p_state] : iter->players)
-                if (!has_player_committed_choice( p_state))
+            for (const auto& [k, p_state] : iter->players) {
+                if (p_state.actual_choice.empty())
                     return false;
+            }
             return true;
         }
 
