@@ -1,5 +1,37 @@
-[31mError 3015013: Unpack data exception[0m
-[33mError Details:
-Unable to unpack array of built-in type 'name' while processing 'name[]'[0m
-Stack Trace:
-abi_serializer.cpp:327 _binary_to_variant
+{
+  "rows": [{
+      "game_id": 0,
+      "last_eval_player": "",
+      "deadline": 0,
+      "wager_pool": "0.0000 SYS",
+      "is_active": 0,
+      "clear_winners": [
+        "foo"
+      ]
+    },{
+      "game_id": 1,
+      "last_eval_player": "",
+      "deadline": 1575599882,
+      "wager_pool": "30.0000 VT",
+      "is_active": 0,
+      "clear_winners": [
+        "player1",
+        "player2",
+        "player3"
+      ]
+    },{
+      "game_id": 2,
+      "last_eval_player": "",
+      "deadline": 1575599885,
+      "wager_pool": "76.0000 VT",
+      "is_active": 1,
+      "clear_winners": [
+        "player4",
+        "player1",
+        "player5"
+      ]
+    }
+  ],
+  "more": false,
+  "next_key": ""
+}

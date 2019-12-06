@@ -1,0 +1,21 @@
+{
+  "rows": [{
+      "player": "player1",
+      "choice": "ca26005c091d4d913ae949d860c1dd3efa4628988fd65feb6b45c4c35a6d30b4",
+      "actual_choice": "",
+      "active": 1
+    },{
+      "player": "player2",
+      "choice": "87332fe8218141ccac83eb268de3632526584c39bde714a8ff17f6c27f1612f3",
+      "actual_choice": "",
+      "active": 1
+    },{
+      "player": "player3",
+      "choice": "abb85834886bc77d4bc6eb70d36fe318d58918266336e9eb76bb96d46e0d226f",
+      "actual_choice": "",
+      "active": 1
+    }
+  ],
+  "more": false,
+  "next_key": ""
+}

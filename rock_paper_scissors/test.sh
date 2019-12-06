@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # set this to true if you want verbose output
-VERBOSE=false
+VERBOSE=true
 
 if [[ $1 == "non-root" ]]; then
     ACCOUNT="rps"
@@ -20,13 +20,18 @@ else
 fi
 
 function check_state() {
-    command="cleos --verbose get table $ACCOUNT $ACCOUNT $1"
+    if [[ $# -eq 3 ]]; then
+       SCOPE=$3
+    else
+       SCOPE=$ACCOUNT
+    fi
+    command="cleos --verbose get table $ACCOUNT $SCOPE $1"
     eval $command &> .test.output
-    diff -I "game_deadline.*" -I "warn.*" -I "executed.*" .test.output ./expected/$1.$2.expected &> /dev/null
+    diff -I "deadline.*" -I "warn.*" -I "executed.*" -I "\"next_key.*" .test.output ./expected/$1.$2.expected &> /dev/null
     status=$?
     if [[ $status != 0 ]]; then
         echo -e "\e[31mFailure, table does not match $1.$2.expected\e[0m"
-        diff -I "game_deadline.*" .test.output ./expected/$1.$2.expected
+        diff -I "deadline.*" .test.output ./expected/$1.$2.expected
         exit -1
     fi
     echo -e "\e[32mcheck state $1 $2 passed\e[0m"
@@ -118,6 +123,7 @@ try_join player2 "10.0000 VT" "scissors" 33
 try_join player3 "10.0000 VT" "paper" 13
 
 check_state games 0
+check_state players 0 1
 
 sleep 3
 
@@ -126,6 +132,7 @@ try_join player1 "20.0000 VT" "rock" 32
 try_join player5 "23.0000 VT" "paper" 22
 
 check_state games 1
+check_state players 1 2
 
 sleep 3
 

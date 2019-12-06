@@ -16,5 +16,6 @@
       "deposit": "100.0000 VT"
     }
   ],
-  "more": false
+  "more": false,
+  "next_key": ""
 }
